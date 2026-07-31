@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   
   description: `Khalti is a digital wallet for instant, secure and hassle-free online payments in Nepal. Recharge your mobiles, pay bills, book tickets whreever you are.
   web.khalti.com`,
+    openGraph: {
+    title: "Khalti Digital Wallet - Instant, Secure and Hassle-Free Online Payments in Nepal",
+    description: `Khalti is a digital wallet for instant, secure and hassle-free online payments in Nepal. Recharge your mobiles, pay bills, book tickets whreever you are.
+  web.khalti.com`,
+    images: [], // empty array = no preview image shown
+  },
 };
 
 export default function RootLayout({
