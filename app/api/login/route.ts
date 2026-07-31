@@ -1,26 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { mobile, password } = body;
 
-    // Basic hardcoded check for testing purposes
-    // TODO: Replace this with real database validation later
-    if (mobile === "9800000000" && password === "admin123") {
+    // Mock validation
+    if (mobile !== "9800000000" || password !== "test123") {
       return NextResponse.json(
-        { success: true, message: "Login successful" },
-        { status: 200 }
+        { message: "Invalid credentials" },
+        { status: 401 }
       );
     }
 
-    return NextResponse.json(
-      { success: false, message: "Invalid mobile/email or password" },
-      { status: 401 }
+    const response = NextResponse.json(
+      { message: "Login successful" },
+      { status: 200 }
     );
-  } catch (error) {
+
+    response.cookies.set("session_token", "mock-jwt-token-abc123", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60,
+    });
+
+    return response;
+  } catch {
     return NextResponse.json(
-      { success: false, message: "Something went wrong" },
+      { message: "Something went wrong" },
       { status: 500 }
     );
   }

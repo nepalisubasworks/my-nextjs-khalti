@@ -17,8 +17,8 @@ export default function Home() {
       </div>
 
       {/* Right panel — scrollable only here */}
-      <div className="flex-1 h-full overflow-y-scroll">
-        <div className="min-h-full flex flex-col items-center p-6 pb-21">
+      <div className="flex-1 h-full overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center p-5 pb-5">
           <div className="my-auto w-full flex justify-center">
             <LoginForm />
           </div>

@@ -10,8 +10,10 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Khalti - Login",
-  description: "A practice login clone for internship learning purposes.",
+  title: "Khalti Digital Wallet - Instant, Secure and Hassle-Free Online Payments in Nepal",
+  
+  description: `Khalti is a digital wallet for instant, secure and hassle-free online payments in Nepal. Recharge your mobiles, pay bills, book tickets whreever you are.
+  web.khalti.com`,
 };
 
 export default function RootLayout({
@@ -20,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${poppins.variable} overflow-y-scroll`}>
+    <html lang="en" className={`${poppins.variable}`}>
       <body className="font-sans antialiased bg-white text-gray-900 min-h-screen">
         {children}
       </body>
