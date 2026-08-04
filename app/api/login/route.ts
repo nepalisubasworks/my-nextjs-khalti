@@ -1,36 +1,88 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+})
+const prisma = new PrismaClient({ adapter })
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { mobile, password } = body;
+    const body = await req.json()
+    const { mobile, password } = body
 
-    // Mock validation
-    if (mobile !== "9800000000" || password !== "test123") {
-      return NextResponse.json(
-        { message: "Invalid credentials" },
-        { status: 401 }
-      );
+    const user = await prisma.user.findUnique({
+      where: { mobile },
+    })
+
+    let success = false
+    let userId: string | null = null
+    let role: string = 'user'
+
+    if (user && user.password === password) {
+      success = true
+      userId = user.id
+      role = user.role || 'user'   // ← Use actual role from DB
     }
 
-    const response = NextResponse.json(
-      { message: "Login successful" },
-      { status: 200 }
-    );
+    // Record login attempt
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+    await prisma.loginEvent.create({
+      data: {
+        userId: userId || undefined,
+        mobile,
+        success,
+        ipAddress: ip || null,
+      },
+    })
 
-    response.cookies.set("session_token", "mock-jwt-token-abc123", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60,
-    });
+    // Create notification
+    await prisma.adminNotification.create({
+      data: {
+        message: success
+          ? `✅ ${role === 'admin' ? 'Admin' : 'User'} ${mobile} logged in`
+          : `❌ Failed login attempt for ${mobile}`,
+      },
+    })
 
-    return response;
-  } catch {
+    if (success) {
+      const response = NextResponse.json(
+        { message: 'Login successful', role },
+        { status: 200 }
+      )
+
+      const isProduction = process.env.NODE_ENV === 'production'
+      response.cookies.set('session_token', 'mock-jwt-token-abc123', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60,
+      })
+
+      response.cookies.set('user_role', role, {
+        httpOnly: false,
+        secure: isProduction,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60,
+      })
+
+      return response
+    } else {
+      return NextResponse.json(
+        { message: 'Invalid credentials' },
+        { status: 401 }
+      )
+    }
+  } catch (error) {
+    console.error(error)
     return NextResponse.json(
-      { message: "Something went wrong" },
+      { message: 'Something went wrong' },
       { status: 500 }
-    );
+    )
+  } finally {
+    await prisma.$disconnect()
   }
 }

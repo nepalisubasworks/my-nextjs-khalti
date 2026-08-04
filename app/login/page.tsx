@@ -16,10 +16,11 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* Right panel — independent scroll area */}
-      <div className="flex-1 h-full overflow-y-scroll flex items-center justify-center p-6">
-        <LoginForm />
-        <div className="h-150 w-full shrink-0" aria-hidden="true" />
+      {/* Right panel — scrollable vertically, no horizontal scroll */}
+      <div className="flex-1 h-full overflow-y-auto overflow-x-hidden flex items-center justify-center p-4 md:p-6">
+        <div className="w-full max-w-md">
+          <LoginForm />
+        </div>
       </div>
     </main>
   );

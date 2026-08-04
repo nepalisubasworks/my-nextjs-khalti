@@ -1,12 +1,10 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [mobileError, setMobileError] = useState("");
@@ -43,12 +41,24 @@ export default function LoginForm() {
       });
       const data = await res.json();
 
+      console.log("🔍 Login response:", data);        // ← You will see this in Console
+      console.log("🔍 Role received:", data.role);    // ← This too
+
       if (!res.ok) {
         setFormError(data.message || "Login failed. Please try again.");
-      } else {
-        router.push("/dashboard");
+        return;
       }
-    } catch {
+
+      const { role } = data;
+      if (role === "admin") {
+        console.log("✅ Redirecting to /admin/dashboard");
+        window.location.href = "/admin/dashboard";
+      } else {
+        console.log("✅ Redirecting to /dashboard");
+        window.location.href = "/dashboard";
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       setFormError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

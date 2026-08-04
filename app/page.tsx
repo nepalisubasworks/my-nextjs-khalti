@@ -1,14 +1,14 @@
 import Image from "next/image";
 import LoginForm from "@/components/LoginForm";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="flex flex-col md:flex-row h-screen overflow-hidden bg-white">
       {/* Left panel — fixed, never scrolls */}
-      <div className="hidden md:block md:w-1/2 h-full relative bg-[#252525] overflow-hidden">
+      <div className="hidden md:block md:w-1/2 h-full relative overflow-hidden">
         <Image
           src="/logo.png"
-          alt="Practice Wallet"
+          alt="Khalti Logo"
           fill
           sizes="50vw"
           className="object-cover"
@@ -16,12 +16,10 @@ export default function Home() {
         />
       </div>
 
-      {/* Right panel — scrollable only here */}
-      <div className="flex-1 h-full overflow-y-auto">
-        <div className="min-h-full flex flex-col items-center p-5 pb-5">
-          <div className="my-auto w-full flex justify-center">
-            <LoginForm />
-          </div>
+      {/* Right panel — scrollable vertically, no horizontal overflow */}
+      <div className="flex-1 h-full overflow-y-auto overflow-x-hidden flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          <LoginForm />
         </div>
       </div>
     </main>

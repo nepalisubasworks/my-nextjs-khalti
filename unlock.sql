@@ -1,0 +1,1 @@
+ALTER TABLE "User" SET (schema_locked = false);
