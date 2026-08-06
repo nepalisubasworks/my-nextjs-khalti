@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 
-export default function LoginForm() {
+export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
@@ -41,9 +41,6 @@ export default function LoginForm() {
       });
       const data = await res.json();
 
-      console.log("🔍 Login response:", data);        // ← You will see this in Console
-      console.log("🔍 Role received:", data.role);    // ← This too
-
       if (!res.ok) {
         setFormError(data.message || "Login failed. Please try again.");
         return;
@@ -51,14 +48,11 @@ export default function LoginForm() {
 
       const { role } = data;
       if (role === "admin") {
-        console.log("✅ Redirecting to /admin/dashboard");
-        window.location.href = "/admin/dashboard";
-      } else {
-        console.log("✅ Redirecting to /dashboard");
         window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/user/dashboard";
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch {
       setFormError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -68,8 +62,8 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-115 flex flex-col font-sans">
       {/* ── Header row ── */}
-      <div className="flex items-center justify-between">
-        <div className="relative h-20 w-65">
+      <div className="flex items-center justify-between gap-2">
+        <div className="relative h-16 w-48 sm:w-65">
           <Image
             src="/khalti.png"
             alt="Khalti"
@@ -78,10 +72,9 @@ export default function LoginForm() {
             priority
           />
         </div>
-
         <Link
           href="/subuser-login"
-          className="text-[15px] text-[#c41e3a] font-medium flex items-center gap-1 hover:text-blue-600 transition-colors"
+          className="text-xs sm:text-[15px] text-[#c41e3a] font-medium flex items-center gap-1 hover:text-blue-600 transition-colors whitespace-nowrap"
         >
           Login as SubUser
           <svg
@@ -157,7 +150,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            className={`peer w-full border rounded-md px-4 py-3.5 pr-10 text-[15px] placeholder:text-gray-300 focus:outline-none disabled:bg-gray-100 transition-all ${
+            className={`peer w-full border rounded-md px-4 py-3.5 pr-12 text-[15px] placeholder:text-gray-300 focus:outline-none disabled:bg-gray-100 transition-all ${
               passwordError
                 ? "border-[#c41e3a] bg-[#fdf1f1] text-[#c41e3a] focus:ring-1 focus:ring-[#c41e3a]"
                 : "border-gray-200 text-gray-900 focus:ring-[0.5px] focus:ring-blue-500 focus:border-transparent"
@@ -167,14 +160,12 @@ export default function LoginForm() {
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={loading}
-            className={`absolute right-3.5 top-1/2 -translate-y-1/2 hover:text-gray-600 transition-colors p-0.5 ${
-              passwordError ? "text-[#c41e3a]" : "text-gray-400 peer-focus:text-gray-600"
-            }`}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-0.5"
           >
             {showPassword ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5.5 0-9.5-4.5-10-8a13.13 13.13 0 0 1 3.06-4.94M9.9 4.24A10.9 10.9 0 0 1 12 4c5.5 0 9.5 4.5 10 8a13.14 13.14 0 0 1-1.67 3.06" />
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5.5 0-9.5-4.5-10-8a13.13 13.13 0 0 1 1.67-3.06" />
+                <path d="M9.9 4.24A10.9 10.9 0 0 1 12 4c5.5 0 9.5 4.5 10 8a13.14 13.14 0 0 1-1.67 3.06" />
                 <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
                 <line x1="1" y1="1" x2="23" y2="23" />
               </svg>
@@ -218,9 +209,13 @@ export default function LoginForm() {
 
       <p className="text-[15px] text-gray-600 text-center font-medium mt-6">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-[#c41e3a] font-bold hover:underline">
+        <button
+          type="button"
+          onClick={onSwitchToSignup}
+          className="text-[#c41e3a] font-bold"
+        >
           Signup
-        </Link>
+        </button>
       </p>
     </form>
   );

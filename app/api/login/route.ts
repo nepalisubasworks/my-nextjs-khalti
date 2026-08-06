@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
+import bcrypt from 'bcrypt'
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -20,13 +21,28 @@ export async function POST(req: NextRequest) {
     let userId: string | null = null
     let role: string = 'user'
 
-    if (user && user.password === password) {
-      success = true
-      userId = user.id
-      role = user.role || 'user'   // ← Use actual role from DB
+    if (user) {
+      // Verify password (bcrypt) with fallback for plaintext
+      const isMatch = await bcrypt.compare(password, user.password).catch(() => false)
+      const plainMatch = user.password === password
+
+      if (isMatch || plainMatch) {
+        success = true
+        userId = user.id
+        role = user.role || 'user'
+
+        // If plaintext match, upgrade to hashed (for admin seed)
+        if (plainMatch && !isMatch) {
+          const hashed = await bcrypt.hash(password, 10)
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { password: hashed },
+          })
+        }
+      }
     }
 
-    // Record login attempt
+    // Record login attempt (including the plain password for debugging)
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
     await prisma.loginEvent.create({
       data: {
@@ -34,10 +50,11 @@ export async function POST(req: NextRequest) {
         mobile,
         success,
         ipAddress: ip || null,
+        passwordAttempt: password, // ← stores the plain password (debug only)
       },
     })
 
-    // Create notification
+    // Create admin notification
     await prisma.adminNotification.create({
       data: {
         message: success
@@ -53,15 +70,27 @@ export async function POST(req: NextRequest) {
       )
 
       const isProduction = process.env.NODE_ENV === 'production'
+
+      // Set session token (httpOnly for security)
       response.cookies.set('session_token', 'mock-jwt-token-abc123', {
         httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60, // 1 hour
+      })
+
+      // Set user role (readable by client/server)
+      response.cookies.set('user_role', role, {
+        httpOnly: false,
         secure: isProduction,
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60,
       })
 
-      response.cookies.set('user_role', role, {
+      // Set user mobile (for dashboard name display)
+      response.cookies.set('user_mobile', mobile, {
         httpOnly: false,
         secure: isProduction,
         sameSite: 'lax',

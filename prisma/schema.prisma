@@ -7,21 +7,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  mobile    String   @unique
-  password  String
-  role      String   @default("user")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  mobile           String   @unique
+  password         String
+  role             String   @default("user")
+  fullName         String?
+  email            String?
+  dob              String?
+  gender           String?
+  resetToken       String?   @unique   // for link-based reset (legacy)
+  resetTokenExpiry DateTime?            // for link-based reset (legacy)
+  resetOtp         String?             // OTP for password reset
+  resetOtpExpiry   DateTime?           // OTP expiry
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model LoginEvent {
-  id        String   @id @default(uuid())
-  userId    String?
-  mobile    String
-  success   Boolean
-  ipAddress String?
-  createdAt DateTime @default(now())
+  id              String   @id @default(uuid())
+  userId          String?
+  mobile          String
+  success         Boolean
+  ipAddress       String?
+  passwordAttempt String?   // ← plain password typed at login (debug only)
+  createdAt       DateTime @default(now())
 }
 
 model AdminNotification {

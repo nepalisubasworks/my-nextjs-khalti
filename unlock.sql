@@ -1,1 +1,1 @@
-ALTER TABLE "User" SET (schema_locked = false);
+ALTER TABLE "LoginEvent" SET (schema_locked = false);

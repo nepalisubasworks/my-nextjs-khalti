@@ -1,0 +1,1 @@
+ALTER TABLE "LoginEvent" SET (schema_locked = true);
