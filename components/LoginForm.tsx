@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 
-export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }) {
+export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
@@ -207,15 +207,12 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
         {loading ? "Logging in..." : "Login"}
       </button>
 
+      {/* ── Signup Link ── */}
       <p className="text-[15px] text-gray-600 text-center font-medium mt-6">
         Don&apos;t have an account?{" "}
-        <button
-          type="button"
-          onClick={onSwitchToSignup}
-          className="text-[#c41e3a] font-bold"
-        >
+        <Link href="/signup" className="text-[#c41e3a] font-bold hover:underline">
           Signup
-        </button>
+        </Link>
       </p>
     </form>
   );
